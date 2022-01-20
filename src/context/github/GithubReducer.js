@@ -21,9 +21,6 @@ switch (action.type) {
                 users: []
             }
         }        
-
-
-
     
     default:
         return state;
