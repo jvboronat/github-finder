@@ -1,3 +1,4 @@
+import { createDevServerConfigProviderProxy } from "@craco/craco"
 import { createContext, useReducer } from "react"
 import githubReducer from "./GithubReducer"
 
@@ -12,6 +13,7 @@ export const GithubProvider = ({children}) => {
     const initialState = {
         users: [],
         user: {},
+        repos: [],
         loading: false
     }
 
@@ -61,10 +63,43 @@ export const GithubProvider = ({children}) => {
         } else {
 
             const data = await response.json()
+
+            //const repos = await getRepos(login)
+
+            //console.log('repos in Context', repos)
             dispatch({
                 type: 'GET_USER'
-                , payload: data,
+                , payload: data
+                
             })            
+        }        
+    }  
+    
+    const getRepos = async (login) => {
+
+        setLoding()
+
+
+
+        const response = await fetch(`${GITHUB_URL}/users/${login}/repos`
+        , {
+            headers: {
+                Authorization: `token ${GITHUB_TOKEN}`
+            }
+        }
+        )
+
+        if (response.status === 404) {
+            window.location = '/notfound'
+        } else {
+            
+            const data = await response.json()
+ 
+            dispatch({
+                type: 'GET_REPOS'
+                , payload: data,
+            })                     
+            
         }        
     }      
 
@@ -83,10 +118,12 @@ export const GithubProvider = ({children}) => {
     return <GithubContext.Provider value={{
         users: state.users,
         user: state.user,
+        repos: state.repos,        
         loading: state.loading,
         searchUsers,
         clearUsers,
-        getUser
+        getUser,
+        getRepos
     }}>
         {children}
 
