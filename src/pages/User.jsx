@@ -14,8 +14,8 @@ function User() {
     useEffect(() => {
         getUser(params.login)
         getRepos(params.login)
-
-    
+        
+        // eslint-disable-next-line
     }, [])
 
     const {
