@@ -5,18 +5,35 @@ import { useParams } from 'react-router-dom'
 import Spinner from '../components/layout/Spinner'
 import GithubContext from '../context/github/GithubContext'
 import RepoList from '../components/repos/RepoList'
+import {getRepos, getUser} from '../context/github/GithubActions'
 
 function User() {
 
-    const {getUser, user, loading, repos, getRepos} = useContext(GithubContext)
+    const {user, repos, loading, dispatch} = useContext(GithubContext)
     const params = useParams()
 
     useEffect(() => {
-        getUser(params.login)
-        getRepos(params.login)
-        
-        // eslint-disable-next-line
-    }, [])
+
+        dispatch({
+            type: 'SET_LOADING'
+        })
+
+        const getUserAndRepos = async () => {
+            
+            const data_user  = await getUser(params.login)
+            const data_repos = await getRepos(params.login)
+
+            dispatch({
+                type: 'GET_USER_AND_REPOS'
+                , payload: {user: data_user, repos: data_repos}
+            })                                   
+        }
+
+        getUserAndRepos()        
+
+    }, [dispatch, params.login])
+
+
 
     const {
         name,
