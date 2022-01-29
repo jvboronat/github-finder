@@ -23,18 +23,22 @@ export const searchUsers = async (text) => {
 }     
 
 export const getUser = async (login) => {
+    try {
+    
+        const response = await github.get(`/users/${login}`)
 
-    const response = await github.get(`/users/${login}`)
-
-    if (response.status === 404) {
-        window.location = '/notfound'
-    } else {
-
-        return response.data    
-    }   
+        return response.data
+    } catch (error) {
+        console.log(error)
+        
+        window.location= '/notfound'
+    }
 }  
 
-export const getRepos = async (login) => {
+ 
+
+
+ export const getRepos = async (login) => {
 
     const params = new URLSearchParams({
         sort:'created',
@@ -44,9 +48,10 @@ export const getRepos = async (login) => {
     const response = await github.get(`/users/${login}/repos?${params}`)
 
     if (response.status === 404) {
-        window.location = '/notfound'
+        //window.location = '/notfound'
+        return[]
     } else {     
 
         return response.data;                       
     }    
-}      
+} 
