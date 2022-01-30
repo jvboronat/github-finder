@@ -1,38 +1,30 @@
 import {FaCodepen, FaStore, FaUserFriends, FaUsers} from 'react-icons/fa'
-import {useContext, useEffect} from 'react'
+import {useContext} from 'react'
 import {Link} from 'react-router-dom'
 import { useParams } from 'react-router-dom'
 import Spinner from '../components/layout/Spinner'
 import GithubContext from '../context/github/GithubContext'
 import RepoList from '../components/repos/RepoList'
-import {getRepos, getUser} from '../context/github/GithubActions'
+import useFetchAxios from '../hooks/useFetchAxios'
+
+const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN
 
 function User() {
 
-    const {user, repos, loading, dispatch} = useContext(GithubContext)
+    const options = {headers: {
+        Authorization: `token ${GITHUB_TOKEN}`
+    }} 
+
+    const params_repo = new URLSearchParams({
+        sort:'created',
+        per_page: 10,
+    })  
+
     const params = useParams()
 
-    useEffect(() => {
-
-        dispatch({
-            type: 'SET_LOADING'
-        })
-
-        const getUserAndRepos = async () => {
-            
-            const data_user  = await getUser(params.login)
-            const data_repos = await getRepos(params.login)
-
-            dispatch({
-                type: 'GET_USER_AND_REPOS'
-                , payload: {user: data_user, repos: data_repos}
-            })                                   
-        }
-
-        getUserAndRepos()        
-
-    }, [dispatch, params.login])
-
+    const {user, repos, loading} = useContext(GithubContext)
+    const notFoundUser = useFetchAxios(`/users/${params.login}`,options, 'GET_USER')
+    const notFoundRepos = useFetchAxios(`/users/${params.login}/repos?${params_repo}`,options, 'GET_REPOS')
 
 
     const {
@@ -55,6 +47,11 @@ function User() {
     if (loading) {
         return <Spinner/>
     }    
+
+    if (notFoundUser || notFoundRepos)
+    {
+        window.location = '/notfound'
+    }
     
     return (
         <>
